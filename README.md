@@ -94,3 +94,11 @@ The application will run locally at **`http://localhost:5173`**.
 3. Set the Build Command to `npm install` and Start Command to `node server.js`.
 4. Under Environment Variables, add your `MONGO_URI`, `JWT_SECRET`, `GROQ_API_KEY`, `GOOGLE_CLIENT_ID`, and `PORT` (e.g. `5000`).
 5. Click **Create Web Service**.
+
+---
+
+## 🔗 Live Application Links
+
+- **Live Web Application:** [https://dsa-tracker-jp.vercel.app](https://dsa-tracker-jp.vercel.app)
+- **Backend API Server:** [https://dsa-tracker-ai.onrender.com](https://dsa-tracker-ai.onrender.com)
+
