@@ -62,6 +62,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (credential) => {
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/google', { credential });
+      localStorage.setItem('dsa_token', res.data.token);
+      setUser(res.data.user);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Google login failed. Please try again.'
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('dsa_token');
     setUser(null);
@@ -92,7 +109,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, login, register, logout, updateUserSettings, refreshUser }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, loginWithGoogle, register, logout, updateUserSettings, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

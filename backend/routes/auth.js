@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 
@@ -185,6 +186,112 @@ router.put('/me/update', auth, async (req, res) => {
   } catch (error) {
     console.error('Update profile error:', error.message);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Initialize Google OAuth2Client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// @route   POST api/auth/google
+// @desc    Authenticate or register user with Google OAuth
+// @access  Public
+router.post('/google', async (req, res) => {
+  const { credential } = req.body;
+
+  try {
+    if (!credential) {
+      return res.status(400).json({ message: 'No Google credential token provided' });
+    }
+
+    let email, name;
+
+    // Check if Google Client ID is configured. If not, allow mock login for development.
+    if (!process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID.startsWith('mock_')) {
+      console.log('Google Sign-In: Client ID not set or mock. Performing development fallback...');
+      // Extract from a mock token (which is just a JSON payload sent in dev) or use parameters
+      if (credential.startsWith('mock_')) {
+        email = req.body.email || 'google_developer@example.com';
+        name = req.body.name || 'Google Developer';
+      } else {
+        // Try decoding JWT payload directly without verification since we have no Client ID
+        try {
+          const parts = credential.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+            email = payload.email;
+            name = payload.name;
+          }
+        } catch (e) {
+          email = 'google_developer@example.com';
+          name = 'Google Developer';
+        }
+      }
+    } else {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      email = payload.email;
+      name = payload.name;
+    }
+
+    if (!email) {
+      return res.status(400).json({ message: 'Invalid token: email not found' });
+    }
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create user if not exists
+      let baseUsername = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '_') : 'user';
+      let username = baseUsername;
+      let count = 1;
+      while (await User.findOne({ username })) {
+        username = `${baseUsername}_${count}`;
+        count++;
+      }
+
+      // Generate a long random password for database validation
+      const randomPassword = require('crypto').randomBytes(16).toString('hex');
+
+      // Initialize pattern mastery map
+      const patternMastery = new Map();
+      CORE_PATTERNS.forEach(pattern => {
+        patternMastery.set(pattern, 0);
+      });
+
+      user = await User.create({
+        username,
+        email,
+        password: randomPassword,
+        patternMastery
+      });
+      console.log(`Created new user through Google login: ${username} (${email})`);
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        xp: user.xp,
+        level: user.level,
+        streak: user.streak,
+        lastActiveDate: user.lastActiveDate,
+        badges: user.badges,
+        targetProblemsPerDay: user.targetProblemsPerDay,
+        selectedCompanies: user.selectedCompanies,
+        patternMastery: Object.fromEntries(user.patternMastery || new Map())
+      }
+    });
+  } catch (error) {
+    console.error('Google Auth error:', error.message || error);
+    res.status(500).json({ message: 'Google authentication failed' });
   }
 });
 
