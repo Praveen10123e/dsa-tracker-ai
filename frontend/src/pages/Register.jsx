@@ -74,7 +74,7 @@ const Register = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="algorithm_master"
-                  className="w-full pl-11 pr-4 glass-input font-medium"
+                  className="w-full !pl-11 !pr-4 glass-input font-medium"
                   required
                 />
               </div>
@@ -92,7 +92,7 @@ const Register = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-11 pr-4 glass-input font-medium"
+                  className="w-full !pl-11 !pr-4 glass-input font-medium"
                   required
                 />
               </div>
@@ -110,7 +110,7 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-11 pr-4 glass-input font-medium"
+                  className="w-full !pl-11 !pr-4 glass-input font-medium"
                   required
                 />
               </div>
