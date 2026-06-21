@@ -1,0 +1,10 @@
+{
+  "name": "dsa-pattern-tracker-ai-root",
+  "version": "1.0.0",
+  "description": "Root configuration to manage backend and frontend environments",
+  "scripts": {
+    "install-all": "node scripts/installAll.js",
+    "seed": "npm run seed --prefix backend",
+    "dev": "node scripts/startDev.js"
+  }
+}

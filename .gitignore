@@ -1,0 +1,20 @@
+# Environment secrets — NEVER commit these
+backend/.env
+frontend/.env.local
+frontend/.env
+
+# Node modules
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
